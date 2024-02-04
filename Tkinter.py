@@ -13,7 +13,7 @@ class MainPage(tk.Tk):
     def __init__(self):
         tk.Tk.__init__(self)
         container = tk.Frame(self)
-        self.geometry("600x600")
+        self.geometry("700x600")
         container.pack(side="top", fill="both", expand=True)
 
         container.grid_rowconfigure(0, weight=1)
@@ -168,22 +168,40 @@ class PlotChannel(tk.Frame):
 
         graph = Figure(figsize=(4, 4), dpi=100)
         canvas = FigureCanvasTkAgg(graph, self)
-        canvas_2 = graph.add_subplot(111)
-        canvas_2.plot([1,2,3,4,5,6,7,8],[5,6,1,3,8,9,3,5])
-        canvas_2.plot([1,2,3,4,5,6,7,8],[10,12,2,6,16,18,6,10])
-        canvas_2.plot([1,2,3,4,5,6,7,8],[15,18,3,9,24,27,9,15])
-        canvas_2.plot([1,2,3,4,5,6,7,8],[1000,1000,1000,1000,1000,1000,1000,1000])
-
-        canvas.draw()
-        canvas.get_tk_widget().pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
+        mine = canvas.get_tk_widget()
 
         toolbar = NavigationToolbar2Tk(canvas, self)
         toolbar.update()
-        canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+        canvas._tkcanvas.pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
+        def plot():
+            nonlocal mine, graph
+            mine.delete()
+            mine.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+            canvas_2 = graph.add_subplot(111)
+            if (first_channel_select.get() != "none" and first_channel_select.get() != ""):
+                canvas_2.plot(Total_channels[first_channel_select.get()].time,Total_channels[first_channel_select.get()].data)
+            else:
+                canvas_2.plot([0,1], [0,0])
+
+            if (second_channel_select.get() != "none" and second_channel_select.get() != ""):
+                canvas_2.plot(Total_channels[second_channel_select.get()].time,Total_channels[second_channel_select.get()].data)
+            else:
+                canvas_2.plot([0,0], [0,1])
+
+            if (third_channel_select.get() != "none" and third_channel_select.get() != ""):
+                canvas_2.plot(Total_channels[third_channel_select.get()].time,Total_channels[third_channel_select.get()].data)
+            else:
+                canvas_2.plot([0,-1], [0,0])
+
+            if (fourth_channel_select.get() != "none" and fourth_channel_select.get() != ""):
+                canvas_2.plot(Total_channels[fourth_channel_select.get()].time,Total_channels[fourth_channel_select.get()].data)
+            else:
+                canvas_2.plot([0,0], [0,-1])
+
+            canvas.draw()
 
 
         frame_select = tk.Frame(self)
-
 
         first_channel_label = tk.Label(frame_select, text="Select 1st:", fg='#00f')
         first_channel_label.pack(side=tk.LEFT)
@@ -197,25 +215,27 @@ class PlotChannel(tk.Frame):
         second_channel= tk.OptionMenu(frame_select, second_channel_select, *Total_channels.keys())
         second_channel.pack(side=tk.LEFT)
 
-        third_channel_label = tk.Label(frame_select, text="Select 1st:", fg='green')
+        third_channel_label = tk.Label(frame_select, text="Select 3rd:", fg='green')
         third_channel_label.pack(side=tk.LEFT)
         third_channel_select = tk.StringVar(value="")
         third_channel= tk.OptionMenu(frame_select, third_channel_select, *Total_channels.keys())
         third_channel.pack(side=tk.LEFT)
 
-        fourth_channel_label = tk.Label(frame_select, text="Select 1st:", fg='red')
+        fourth_channel_label = tk.Label(frame_select, text="Select 4th:", fg='red')
         fourth_channel_label.pack(side=tk.LEFT)
         fourth_channel_select = tk.StringVar(value="")
         fourth_channel= tk.OptionMenu(frame_select, fourth_channel_select, *Total_channels.keys())
         fourth_channel.pack(side=tk.LEFT)
 
 
-        Plot_button = tk.Button()
+        Plot_button = tk.Button(frame_select, text="Plot selcted Functions", command=plot)
+        Plot_button.pack(side=tk.LEFT)
 
-        frame_select.pack(side=tk.BOTTOM)
+        frame_select.pack(side=tk.TOP)
+
         button1 = tk.Button(self, text="Back to Home",
                             command=lambda: controller.show_frame(StartPage))
-        button1.pack()
+        button1.pack(side=tk.BOTTOM)
 
 
 
