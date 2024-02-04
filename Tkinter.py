@@ -41,7 +41,7 @@ class StartPage(tk.Frame):
     def __init__(self, parent, controller):
 
         def refresh_channel():
-            channels_var.set("\n".join([str(channel) for channel in Total_channels]))
+            channels_var.set("\n".join([str(channel) for channel in Total_channels if str(channel) != 'none']))
 
         tk.Frame.__init__(self,parent)
         label = tk.Label(self, text="Elementary Data analysis")
@@ -84,7 +84,9 @@ class AddChannel(tk.Frame):
             if selected_data_type.get() and selected_location.get() and selected_name.get():
                 new_channel = Channel.Channel(channel_name=selected_name.get(),
                         location = selected_location.get(), data_type=selected_data_type.get(),
-                        hertz_rate = 1, data = [], time = [], unique_id = unique)
+                        hertz_rate = 1, data_points = [float(data_point) for data_point in data.get().split()],
+                        time_points = [float(time_point) for time_point in time.get().split()], 
+                        unique_id = unique)
                 Total_channels[str(new_channel)] = new_channel
                 unique += 1
                 unique_channel_var.set(unique_channel_var.get() + 1)
@@ -94,6 +96,8 @@ class AddChannel(tk.Frame):
             selected_name.set("")
             selected_location.set("")
             selected_data_type.set("")
+            data.set("")
+            time.set("")
 
           
              
@@ -135,6 +139,21 @@ class AddChannel(tk.Frame):
         location_label.pack(side=tk.LEFT)
 
 
+        data_location_frame = tk.Frame(self)
+        data_location_frame.pack()
+        data = tk.StringVar(value="")
+        data_entry = tk.Entry(data_location_frame,textvariable=data)
+        data_entry.pack(side=tk.RIGHT)
+        data_label = tk.Label(data_location_frame, text="Enter the data seperated by a space: ")
+        data_label.pack(side=tk.LEFT)
+
+        time_location_frame = tk.Frame(self)
+        time_location_frame.pack()
+        time = tk.StringVar(value="")
+        time_entry = tk.Entry(time_location_frame,textvariable=time)
+        time_entry.pack(side=tk.RIGHT)
+        time_label = tk.Label(time_location_frame, text="Enter the time values seperated by a space: ")
+        time_label.pack(side=tk.LEFT)
 
 
         button_add_channel = tk.Button(self, text="Add new channel",
@@ -179,53 +198,78 @@ class PlotChannel(tk.Frame):
             mine.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
             canvas_2 = graph.add_subplot(111)
             if (first_channel_select.get() != "none" and first_channel_select.get() != ""):
-                canvas_2.plot(Total_channels[first_channel_select.get()].time,Total_channels[first_channel_select.get()].data)
+                canvas_2.plot(Total_channels[first_channel_select.get()].time_points,Total_channels[first_channel_select.get()].data_points)
             else:
-                canvas_2.plot([0,1], [0,0])
+                canvas_2.plot([0,0], [0,0])
 
             if (second_channel_select.get() != "none" and second_channel_select.get() != ""):
-                canvas_2.plot(Total_channels[second_channel_select.get()].time,Total_channels[second_channel_select.get()].data)
+                canvas_2.plot(Total_channels[second_channel_select.get()].time_points,Total_channels[second_channel_select.get()].data_points)
             else:
-                canvas_2.plot([0,0], [0,1])
+                canvas_2.plot([0,0], [0,0])
 
             if (third_channel_select.get() != "none" and third_channel_select.get() != ""):
-                canvas_2.plot(Total_channels[third_channel_select.get()].time,Total_channels[third_channel_select.get()].data)
+                canvas_2.plot(Total_channels[third_channel_select.get()].time_points,Total_channels[third_channel_select.get()].data_points)
             else:
-                canvas_2.plot([0,-1], [0,0])
+                canvas_2.plot([0,0], [0,0])
 
             if (fourth_channel_select.get() != "none" and fourth_channel_select.get() != ""):
-                canvas_2.plot(Total_channels[fourth_channel_select.get()].time,Total_channels[fourth_channel_select.get()].data)
+                canvas_2.plot(Total_channels[fourth_channel_select.get()].time_points,Total_channels[fourth_channel_select.get()].data_points)
             else:
-                canvas_2.plot([0,0], [0,-1])
+                canvas_2.plot([0,0], [0,0])
 
             canvas.draw()
 
+        def refresh():
+            nonlocal first_channel, second_channel, third_channel, fourth_channel
+            first_channel.destroy()
+            second_channel.destroy()
+            third_channel.destroy()
+            fourth_channel.destroy()
+            print(*Total_channels.keys())
+            first_channel= tk.OptionMenu(first_pick_frame, first_channel_select, *Total_channels.keys())
+            first_channel.pack(side=tk.LEFT)
+            second_channel= tk.OptionMenu(second_pick_frame, second_channel_select, *Total_channels.keys())
+            second_channel.pack(side=tk.LEFT)
+            third_channel= tk.OptionMenu(third_pick_frame, third_channel_select, *Total_channels.keys())
+            third_channel.pack(side=tk.LEFT)
+            fourth_channel= tk.OptionMenu(fourth_pick_frame, fourth_channel_select, *Total_channels.keys())
+            fourth_channel.pack(side=tk.LEFT)
 
         frame_select = tk.Frame(self)
 
-        first_channel_label = tk.Label(frame_select, text="Select 1st:", fg='#00f')
+
+        first_pick_frame = tk.Frame(frame_select)
+        first_channel_label = tk.Label(first_pick_frame, text="Select 1st:", fg='#00f')
         first_channel_label.pack(side=tk.LEFT)
         first_channel_select = tk.StringVar(value="")
-        first_channel= tk.OptionMenu(frame_select, first_channel_select, *Total_channels.keys())
+        first_channel= tk.OptionMenu(first_pick_frame, first_channel_select, *Total_channels.keys())
         first_channel.pack(side=tk.LEFT)
+        first_pick_frame.pack(side=tk.LEFT)
 
+
+        second_pick_frame = tk.Frame(frame_select)
         second_channel_label = tk.Label(frame_select, text="Select 2nd:", fg='orange')
         second_channel_label.pack(side=tk.LEFT)
         second_channel_select = tk.StringVar(value="")
-        second_channel= tk.OptionMenu(frame_select, second_channel_select, *Total_channels.keys())
+        second_channel= tk.OptionMenu(second_pick_frame, second_channel_select, *Total_channels.keys())
         second_channel.pack(side=tk.LEFT)
+        second_pick_frame.pack(side=tk.LEFT)
 
+        third_pick_frame = tk.Frame(frame_select)
         third_channel_label = tk.Label(frame_select, text="Select 3rd:", fg='green')
         third_channel_label.pack(side=tk.LEFT)
         third_channel_select = tk.StringVar(value="")
-        third_channel= tk.OptionMenu(frame_select, third_channel_select, *Total_channels.keys())
+        third_channel= tk.OptionMenu(third_pick_frame, third_channel_select, *Total_channels.keys())
         third_channel.pack(side=tk.LEFT)
+        third_pick_frame.pack(side=tk.LEFT)
 
+        fourth_pick_frame = tk.Frame(frame_select)
         fourth_channel_label = tk.Label(frame_select, text="Select 4th:", fg='red')
         fourth_channel_label.pack(side=tk.LEFT)
         fourth_channel_select = tk.StringVar(value="")
-        fourth_channel= tk.OptionMenu(frame_select, fourth_channel_select, *Total_channels.keys())
+        fourth_channel= tk.OptionMenu(fourth_pick_frame, fourth_channel_select, *Total_channels.keys())
         fourth_channel.pack(side=tk.LEFT)
+        fourth_pick_frame.pack(side=tk.LEFT)
 
 
         Plot_button = tk.Button(frame_select, text="Plot selcted Functions", command=plot)
@@ -235,7 +279,12 @@ class PlotChannel(tk.Frame):
 
         button1 = tk.Button(self, text="Back to Home",
                             command=lambda: controller.show_frame(StartPage))
+
+        button4 = tk.Button(self, text="Refresh channels list",
+                            command=refresh)
+
         button1.pack(side=tk.BOTTOM)
+        button4.pack(side=tk.BOTTOM)
 
 
 

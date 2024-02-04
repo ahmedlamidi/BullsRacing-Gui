@@ -1,11 +1,11 @@
 class Channel:
-    def __init__(self, channel_name, location, data_type, hertz_rate, data, time, unique_id):
+    def __init__(self, channel_name, location, data_type, hertz_rate, data_points, time_points, unique_id):
         self.channel_name = channel_name
         self.location = location
         self.data_type = data_type
         self.hertz_rate = hertz_rate
-        self.data = data
-        self.time = time
+        self.data_points = data_points
+        self.time_points = time_points
         self.unique_id = unique_id
     
     def add_constant(self, constant):
