@@ -84,3 +84,57 @@ def derivative(input_channel, return_channel, n_samples, start_sample, end_sampl
 
         return_channel.time.append(input_channel.time[right_index])
 
+def derivative(input_channel, return_channel, time_delta, start_interval, end_interval):
+    return_channel.data.clear()
+    return_channel.time.clear()
+
+    start_time = max(input_channel.time[0], start_interval)
+    index_input = 0
+    while start_time > input_channel.time[index_input]:
+        index_input += 1
+    
+    if start_time == input_channel.time[index_input]:
+        start_data = input_channel.data[index_input]
+    else:
+        start_data = linear_approximation(
+            input_channel.time[index_input - 1],
+            input_channel.data[index_input - 1],
+            input_channel.time[index_input],
+            input_channel.data[index_input],
+            start_time
+        )
+
+    current_end_time = start_time + time_delta
+    while index_input < input_channel.data.size() and current_end_time < end_interval:
+        if input_channel.time[index_input] < current_end_time:
+            index_input += 1
+        elif input_channel.time[index_input] == current_end_time:
+            return_channel.time.append(current_end_time)
+            return_channel.data.append((input_channel.data[index_input] - start_data) / time_delta)
+            
+            start_data = input_channel.data[index_input]
+            start_time = input_channel.time[index_input]
+            current_end_time = start_time + time_delta
+            index_input += 1 
+        else:
+            approximate_data = linear_approximation(input_channel.time[index_input - 1],
+                                                    input_channel.data[index_input - 1],
+                                                    input_channel.time[index_input],
+                                                    input_channel.data[index_input],
+                                                    current_end_time)
+            return_channel.time.append(current_end_time)
+            return_channel.data.append((approximate_data - start_data) / time_delta)
+            start_data = approximate_data
+            start_time = current_end_time
+            current_end_time = start_time + time_delta
+
+
+def add_constant(channel, constant):
+    for i in range(len(channel.data)):
+        channel.data[i] += constant
+
+def multiply_by_constant(channel, constant):
+    for i in range(len(channel.data)):
+        channel.data[i] *= constant
+
+
