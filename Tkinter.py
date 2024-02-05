@@ -225,7 +225,6 @@ class PlotChannel(tk.Frame):
             second_channel.destroy()
             third_channel.destroy()
             fourth_channel.destroy()
-            print(*Total_channels.keys())
             first_channel= tk.OptionMenu(first_pick_frame, first_channel_select, *Total_channels.keys())
             first_channel.pack(side=tk.LEFT)
             second_channel= tk.OptionMenu(second_pick_frame, second_channel_select, *Total_channels.keys())
