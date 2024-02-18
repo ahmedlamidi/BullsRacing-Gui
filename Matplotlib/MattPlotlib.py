@@ -1,17 +1,20 @@
 from matplotlib import pyplot
+from numpy import NAN
 import pandas
 
 
 
 
 
-csv_reader = pandas.read_csv("Matplotlib/ads_endurance.csv", header=15)
+csv_reader = pandas.read_csv("Matplotlib/ads_endurance.csv", header=15) 
+#read the data into a dictionary with column names as headers
 
 
-figure, axis = pyplot.subplots(3, 1)
-figure.set_facecolor('black')
+figure, axis = pyplot.subplots(3, 1) # create subplots with x rows and y columns
+figure.set_facecolor('black') #set back ground to black
 
-csv_reader['Total Brake Pressure'] = csv_reader['Brake Pressure Front'] + csv_reader['Brake Pressure Rear']
+
+# create a total pressure column in my csv_reader
 
 axis[0].plot(csv_reader['Time'], csv_reader['Brake Pressure Front'] , label="Brake Pressure Front")
 axis[0].plot(csv_reader['Time'], csv_reader['Brake Pressure Rear'], color='r', label="Brake Pressure Rear")
@@ -36,15 +39,24 @@ axis[1].tick_params(axis='y', colors='#dddddd')
 
 axis[1].set_facecolor('#000000')  
 axis[0].set_facecolor('#000000')
+axis[2].set_facecolor('#000000')
 
-'''
+# plot the top two graphs and set the design to specifications
 
-csv_reader['Brake Bias'] = csv_reader.apply(lambda row: 
-                                            (row['Brake Pressure Front'] / (row['Brake Pressure Front'] + row['Brake Pressure Rear']) 
-                                             if ((row['Brake Pressure Front'] + row['Brake Pressure Rear']) > 0) else NONE), axis=1)
 
-pyplot.scatter(csv_reader['Brake Pressure Front'],csv_reader['Brake Bias'])
-'''
+csv_reader['Total Brake Pressure'] = csv_reader.apply(lambda column: column['Brake Pressure Front'] + column['Brake Pressure Rear'] if column['Brake Pressure Front'] + column['Brake Pressure Rear'] > 0 else NAN, axis=1)
+csv_reader['Brake Bias'] = csv_reader.apply(lambda column: column['Brake Pressure Front'] / column['Total Brake Pressure'] if column['Total Brake Pressure'] > 5 else NAN, axis=1)
+axis[2].scatter(csv_reader['Brake Pressure Front'], csv_reader['Brake Bias'], color='red')
+axis[2].set_ylim(0.55, 0.95)
+axis[2].spines['bottom'].set_color('#dddddd')
+axis[2].spines['top'].set_color('#dddddd') 
+axis[2].spines['right'].set_color('#dddddd')
+axis[2].spines['left'].set_color('#dddddd')
+axis[2].tick_params(axis='x', colors='#dddddd')
+axis[2].tick_params(axis='y', colors='#dddddd')
+
+
+
 pyplot.show()
 
 """
